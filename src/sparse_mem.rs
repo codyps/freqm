@@ -83,7 +83,6 @@ impl SparseMem {
             },
             Some(a) => a,
         };
-        println!("a={}, l={}", appended, self.ranges.len());
 
         // collect follower into the used segment, if any
         for (i, range) in self.ranges.iter().enumerate() {
@@ -107,8 +106,8 @@ impl SparseMem {
 
     pub fn get(&self, range: Range<u64>) -> Option<&[u8]> {
         for r in self.ranges.iter() {
-            if r.0 < range.end && range.start < (r.0 + r.1.len() as u64) {
-                // overlap found, extract the range
+            if contains_range(&(r.0..(r.0 + r.1.len() as u64)), &range) {
+                // this range totally contains the request
                 let r_start = (range.start - r.0).try_into().unwrap();
                 let r_end = (range.end - r.0).try_into().unwrap();
                 return Some(&r.1[r_start..r_end]);
@@ -117,6 +116,14 @@ impl SparseMem {
 
         None
     }
+}
+
+fn contains_range(a: &Range<u64>, b: &Range<u64>) -> bool {
+    if a.start > b.start {
+        return false;
+    }
+
+    return a.end >= b.end;
 }
 
 impl Index<Range<u64>> for SparseMem {
