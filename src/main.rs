@@ -1,8 +1,9 @@
+#[warn(rust_2018_idioms, missing_debug_implementations, missing_docs)]
 use structopt::StructOpt;
 use std::path::PathBuf;
 use std::convert::TryInto;
 use serde::{Serialize, Deserialize};
-use snafu::{Snafu, ensure, ResultExt};
+use snafu::{Snafu, ensure};
 
 #[derive(Debug, StructOpt)]
 struct FreqmOpts {
@@ -12,6 +13,10 @@ struct FreqmOpts {
 
 #[derive(Debug, StructOpt)]
 enum FreqmCmd {
+    /// list supported radio models with the features we support for them
+    Models {
+
+    },
     
     NeCsv { 
         #[structopt(parse(from_os_str))]
@@ -210,6 +215,7 @@ impl std::convert::TryFrom<NeRepeaterRecord> for Repeater {
 
                     Some(n.parse().map_err(|_| FreqmError::CommentParse { comment: nerr.links_and_comments.clone() })?)
                 } else {
+                    // some entries indicate a special split but
                     None
                 }
             },
@@ -276,6 +282,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("{:?}", r2);
 
             }
+        },
+        FreqmCmd::Models { } => {
+            todo!("list-models");
         }
     }
 
